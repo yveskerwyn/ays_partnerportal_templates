@@ -1,0 +1,10 @@
+doc:
+  property:
+  - os: 'name of the parent ays service, which is an os.ssh.ubuntu service'
+  - vars: 'list of environment variables'
+  - url: 'url of the setup script to download'
+links:
+  parent:
+    auto: false
+    optional: false
+    role: os
