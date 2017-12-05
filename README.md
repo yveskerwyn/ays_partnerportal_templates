@@ -1,4 +1,4 @@
-# Partner Portal Host
+# Partner Portal Provisioning
 
 ## Tested on the AYS Server of Artilium
 
@@ -10,12 +10,11 @@
   - SSH: `ssh -A root@195.143.34.162 -p7222`
     - JumpScale Portal configuration: `vim /opt/cfg/portals/main/config.yaml`
   - ItsYou.online: https://itsyou.online/#/organization/artilium-dev2.ays-server-clients/settings
-    - Get the JWT, AYS command line tool: `ays generatetoken --client_id root@..." -validity=3600`
-    artilium-dev2 » ays-server-clients » ays-portal-users
     - JWT: `ays generatetoken --clientid "artilium-dev2.ays-server-clients" --clientsecret $KEY_SECRET --validity 3600`
   - Portal: http://195.143.34.162:8200
 
 
+## Capnp
 
 Install capnp:
 ```bash
@@ -42,7 +41,29 @@ Copy the template:
 scp -P 7222 ~/code/gogs/yves/partnerportal/template/*.* root@195.143.34.162:/opt/var/cockpit_repos/pp/actorTemplates/partnerportal
 ```
 
+## Add the template to your AYS Server
 
+From JumpScale 9.3.0:
+```python
+import os
+app_id = os.environ["APP_ID"]
+secret = os.environ["SECRET"]
+iyo_user = j.clients.itsyouonline.get_user(app_id, secret)
+ays_server_clients_org = iyo_user.organizations.get("artilium-dev2.ays-server-clients")
+org_key = ays_server_clients_org.api_keys.get("ays-server-client-secret")
+ays = j.clients.ays.get("artilium-dev2.ays-server-clients", org_key.model["secret"], "http://195.143.34.162:5000")
+ays.templates.addTemplates("https://github.com/yveskerwyn/partnerportal/template", "master")
+```
+
+From JumpScale 9.2.0 - after having exported your JWT into an env var:
+```python
+import os
+jwt = os.environ["JWT"]
+client = j.clients.atyourservice.get()
+client.api.set_auth_header('Bearer {}'.format(jwt))
+data = {'url':'https://github.com/openvcloud/ays_templates', 'branch': 'master'}
+resp = client.api.ays.addTemplateRepo(data=data)
+```
 
 ## JWT
 
