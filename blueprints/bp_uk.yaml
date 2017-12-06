@@ -1,0 +1,26 @@
+g8client__uk:
+  url: 'uk-ln-vt-1.g8.gigukportal.tech'
+  jwt: 'eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCJ9.eyJhenAiOiJlMnpsTi03U0M2N3RhdjN0UlJuZG9VQUd4a1U1IiwiZXhwIjoxNTEyNDg3MjEzLCJpc3MiOiJpdHN5b3VvbmxpbmUiLCJzY29wZSI6WyJ1c2VyOmFkbWluIl0sInVzZXJuYW1lIjoieXZlcyJ9.5aunPS9EvQqcvYZI4xDJXjpzbT-bZxjRWHzGlmBw3wzmieWLVMjS8ocY8A_GujH8tt1IZS2dq5MjJQX4P66oRiOB26wOPub7BmQ9xCVPdYCk8VNkwzLQ3CoV_MfCWa35'
+  account: 'Account_of_Artilium'
+
+vdc__partnerportals:
+  g8client: 'uk'
+  location: 'uk-ln-vt-1'
+
+node.ovc__pphost:
+    vdc: `partnerportals`
+    bootdisk.size: 50
+    memory: 4
+    os.image: 'Ubuntu 16.04 x64'
+    ports:
+      - '2210:22'
+
+partnerportal__mypp:
+  os: 'pphost'
+  vars:
+    - 'var1=hello'
+    - 'var2=world'
+  url: 'https://raw.githubusercontent.com/yveskerwyn/ays_partnerportal_templates/master/testscript.sh'
+
+actions:
+  - action: install

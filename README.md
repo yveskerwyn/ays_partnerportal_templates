@@ -1,49 +1,27 @@
-# Partner Portal Provisioning
+# AYS Templates for Partner Portals
 
-## Tested on the AYS Server of Artilium
+- [Add the templates to your AYS Server](#add-templates)
+- [How to user the templates](#how-to-use)
 
-- vm-1207 ("AYS-Server"): https://se-gen-1.demo.greenitglobe.com/CBGrid/Virtual%20Machine?id=1207
-  - Directories:
-    - JumpScale: `/opt/code/github/jumpscale`
-    - AYS Repositories: `/opt/var/cockpit_repos/`
-    - Configuration: `/opt/cfg/portals/main/config.yaml`
-  - SSH: `ssh -A root@195.143.34.162 -p7222`
-    - JumpScale Portal configuration: `vim /opt/cfg/portals/main/config.yaml`
-  - ItsYou.online: https://itsyou.online/#/organization/artilium-dev2.ays-server-clients/settings
-    - JWT: `ays generatetoken --clientid "artilium-dev2.ays-server-clients" --clientsecret $KEY_SECRET --validity 3600`
-  - Portal: http://195.143.34.162:8200
+<a id="add-templates"></a>
+## Add the templates to your AYS Server
 
+Requirements:
+- JumpScale 9.3.0
+- On ItsYou.online
+  - Personal profile for which you created and API access key
+    - In the below script requires that you export application ID and secret into environment variables
+  - Owner or member access to the ItsYou.online organization that was used to setup the AYS server
+    - In the below script this organization is `artilium-dev2.ays-server-clients`
+    - The API access key enabled for client credentials flow in the example is label `ays-server-client-secret`
 
-## Capnp
-
-Install capnp:
+Export your personal application id and secret:
 ```bash
-apt-get install capnproto
-capnp id
+export APP_ID="..."
+export SECRET="..."
 ```
 
-## On the AYS Server
-
-Create the repository:
-```bash
-ays generatetoken --clientid "artilium-dev2.ays-server-clients" --clientsecret $KEY_SECRET --validity 3600
-ays repo create -n pp -g http://pp
-```
-
-Create actor template directory:
-```bash
-cd pp
-mkdir actorTemplates/partnerportal
-```
-
-Copy the template:
-```bash
-scp -P 7222 ~/code/gogs/yves/partnerportal/template/*.* root@195.143.34.162:/opt/var/cockpit_repos/pp/actorTemplates/partnerportal
-```
-
-## Add the template to your AYS Server
-
-From JumpScale 9.3.0:
+Execute the following commend from the JumpScale 9.3.0 interactive shell:
 ```python
 import os
 app_id = os.environ["APP_ID"]
@@ -52,22 +30,33 @@ iyo_user = j.clients.itsyouonline.get_user(app_id, secret)
 ays_server_clients_org = iyo_user.organizations.get("artilium-dev2.ays-server-clients")
 org_key = ays_server_clients_org.api_keys.get("ays-server-client-secret")
 ays = j.clients.ays.get("artilium-dev2.ays-server-clients", org_key.model["secret"], "http://195.143.34.162:5000")
-ays.templates.addTemplates("https://github.com/yveskerwyn/partnerportal/template", "master")
+ays.templates.addTemplates("https://github.com/yveskerwyn/ays_partnerportal_templates", "master")
 ```
 
-From JumpScale 9.2.0 - after having exported your JWT into an env var:
-```python
-import os
-jwt = os.environ["JWT"]
-client = j.clients.atyourservice.get()
-client.api.set_auth_header('Bearer {}'.format(jwt))
-data = {'url':'https://github.com/openvcloud/ays_templates', 'branch': 'master'}
-resp = client.api.ays.addTemplateRepo(data=data)
-```
+<a id="how-to-use"></a>
+## How to use the templates
 
-## JWT
+Check the blueprint examples in the [blueprints](/blueprints)
 
-For the blueprint:
+You will have to update the following in the blueprints:
+- [jwt](#jwt)
+- **url**: url of the targeted OpenvCloud system
+- **account**: OpenvCloud account
+- **location**: OpenvCloud location name
+- **vdc**: AYS service name, in the example blueprints it is `partnerportals`
+- **node.ovc**: AYS service name, in the example blueprints it is `pphost`
+- **bootdisk.size**: boot disk size of the virtual machine in GB, e.g. 50 GB 
+- **memory**: memory of the virtual machine in GB, e.g. 4 GB
+- **os.image**: OS image to install on the virtual machine, e.g. "Ubuntu 16.04 x64"; make sure the image is available and enabled on the target system
+- [vars](#vars): the list of environment variables you want to pass
+- [url](#script-url): url from which your installation script can be downloaded
+
+<a id="jwt"></a>
+### JWT
+
+The JSON Web token (JWT) in the blueprint needs to be created for an ItsYou.online user that has been granted access to the target OpenvCloud environment.
+
+Here's how to create the JWT from the JumpScale 9.3.0 interactive shell, using the exported application ID and secret:
 ```python
 import os
 app_id = os.environ["APP_ID"]
@@ -75,15 +64,30 @@ secret = os.environ["SECRET"]
 jwt = j.clients.itsyouonline.get_jwt(app_id, secret)
 ```
 
-For the AYS Server:
-```python
-import os
-app_id = os.environ["APP_ID"]
-secret = os.environ["SECRET"]
-iyo_user = j.clients.itsyouonline.get_user(app_id, secret)
-ays_server_clients_org = iyo_user.organizations.get("artilium-dev2.ays-server-clients")
-org_key = ays_server_clients_org.api_keys.get("ays-server-client-secret")
-ays_jwt = j.clients.itsyouonline.get_jwt("artilium-dev2.ays-server-clients", org_key.model["secret"]) 
+<a id="vars"></a>
+### Environment variables 
+
+This is a list of variables that will be exported in the virtual machine, using the following formatting:
+```yaml
+  vars:
+    - '<key>=value'
+    - ...
 ```
 
+> Note that the variables are only exported for the default `cloudscaler` user.
 
+In the example two variables are exported:
+```yaml
+  vars:
+    - 'var1=hello'
+    - 'var2=world'
+```
+
+<a id="script-url"></a>
+### Script url
+
+The script will be downloaded from the specified url and saved in `~/tmp/pp_setup/script.sh`.
+
+> Note that the script is executed for the default `cloudscaler` user.
+
+In the example the [testscript.sh](testscrip.sh) is downloaded form this repository, which will simple read the exported environment variable into an output fil
