@@ -1,13 +1,14 @@
 # AYS Templates for Partner Portals
 
 - [Add the templates to your AYS Server](#add-templates)
-- [How to user the templates](#how-to-use)
+- [How to use the templates](#how-to-use)
 
 <a id="add-templates"></a>
 ## Add the templates to your AYS Server
 
 Requirements:
-- JumpScale 9.3.0
+- AYS Server 9.2.0 or 9.3.0
+- The below example script to add the templates to your AYS Server require a JumpScale 9.3.0 interactive shell
 - On ItsYou.online
   - Personal profile for which you created and API access key
     - In the below script requires that you export application ID and secret into environment variables
