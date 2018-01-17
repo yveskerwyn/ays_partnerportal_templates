@@ -18,7 +18,7 @@ partnerportal__mypp:
   vars:
     - 'var1=hello'
     - 'var2=world'
-  url: 'https://docs.greenitglobe.com/yves/partnerportal/raw/master/testscript.sh'
+  url: 'https://raw.githubusercontent.com/yveskerwyn/ays_partnerportal_templates/master/testscript.sh'
 
 actions:
   - action: install
