@@ -5,7 +5,7 @@ g8client__be-gen-1:
 
 vdc__partnerportals:
   g8client: 'be-gen-1'
-  location: 'se-gen-1'
+  location: 'be-gen-1'
 
 node.ovc__pphost:
     vdc: 'partnerportals'
