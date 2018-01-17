@@ -8,7 +8,7 @@ vdc__partnerportals:
   location: 'se-gen-1'
 
 node.ovc__pphost:
-    vdc: `partnerportals`
+    vdc: 'partnerportals'
     bootdisk.size: 50
     memory: 4
     os.image: 'Ubuntu 16.04 x64'
