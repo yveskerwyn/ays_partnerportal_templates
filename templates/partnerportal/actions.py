@@ -55,7 +55,7 @@ def install(job):
         cmd = 'echo "{}={}" >> /etc/environment'.format(key, value)
         prefab.core.run(cmd, profile=True)
 
-    to_dir = '~/tmp/pp_setup'
+    to_dir = '/tmp/pp_setup'
     url = data['url'] 
 
     prefab.core.dir_ensure(to_dir)
