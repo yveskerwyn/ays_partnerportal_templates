@@ -60,7 +60,7 @@ def install(job):
 
     prefab.core.dir_ensure(to_dir)
 
-    prefab.core.run("curl {}?$RANDOM >> {}/script.sh".format(url, to_dir))
+    prefab.core.run("curl {}?$RANDOM > {}/script.sh".format(url, to_dir))
 
     cmd = """
     cd {to_dir}
