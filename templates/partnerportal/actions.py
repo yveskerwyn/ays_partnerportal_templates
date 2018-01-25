@@ -33,8 +33,66 @@ def get_prefab_for_cloudscalers(service):
 
     return j.tools.prefab.get(executor, usecache=False)
 
+def _get_cloud_space(service):
+
+    for parent in service.parents:
+        if parent.model.role == 'vdc':
+            vdc = parent
+            break
+
+    if 'g8client' not in vdc.producers:
+        raise j.exceptions.AYSNotFound("No producer g8client found. Cannot continue %s" % service)
+
+    g8client = vdc.producers["g8client"][0]
+    ovc_client = j.clients.openvcloud.getFromAYSService(g8client)
+    ovc_account = ovc_client.account_get(vdc.model.data.account)
+    cloudspace = ovc_account.space_get(vdc.model.dbobj.name, vdc.model.data.location)
+    return cloudspace
+
+def _get_machine_name(service):
+    for parent in service.parents:
+        if parent.model.role == 'node':
+            node = parent
+            break
+
+    return node.name
+
+
+def _add_port_forward(service)
+
+    cloudspace = _get_cloud_space(service)
+    machine_name = _get_machine_name(service)
+    machine = cloudspace.machines.get(machine_name)
+
+    unavailable_ports = [int(portinfo['publicPort']) for portinfo in cloudspace.portforwards]
+    
+    candidate = 80
+
+    while candidate in unavailable_ports:
+        candidate += 1
+
+    available_port = candidate
+    
+    try:
+        cloudspace.client.api.cloudapi.portforwarding.create(
+            cloudspaceId=machine.space.model['id'],
+            protocol="tcp",
+            localPort=80,
+            machineId=machine.model['id'],
+            publicIp=machine.space.model['publicipaddress'],
+            publicPort=available_port
+        )
+
+    except Exception as e:
+        raise j.exceptions.RuntimeError("Port forward creation failed for pubic port {} to port 80".format(available_port))
+
+    return available_port
+
 def install(job):
     service = job.service
+
+    # Add port forward
+    public_port = _add_port_forward(service)
 
     # Get prefab for cloudscaler, if not we get prefab for root
     #prefab = get_prefab_for_cloudscalers(service)
