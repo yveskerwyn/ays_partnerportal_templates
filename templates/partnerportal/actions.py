@@ -77,7 +77,7 @@ def _add_port_forward(service)
         cloudspace.client.api.cloudapi.portforwarding.create(
             cloudspaceId=machine.space.model['id'],
             protocol="tcp",
-            localPort=80,
+            localPort=8000,
             machineId=machine.model['id'],
             publicIp=machine.space.model['publicipaddress'],
             publicPort=available_port
