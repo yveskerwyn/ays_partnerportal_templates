@@ -57,34 +57,57 @@ def _get_machine_name(service):
 
     return node.name
 
+def _get_node(service):
+    for parent in service.parents:
+        if parent.model.role == 'node':
+            node = parent
+            break
+
+    return node
 
 def _add_port_forward(service)
-
+    import ipdb; ipdb.set_trace()
     cloudspace = _get_cloud_space(service)
-    machine_name = _get_machine_name(service)
-    machine = cloudspace.machines.get(machine_name)
+    #machine_name = _get_machine_name(service)
+    #machine = cloudspace.machines.get(machine_name)
 
     unavailable_ports = [int(portinfo['publicPort']) for portinfo in cloudspace.portforwards]
     
-    candidate = 80
+    candidate = 8000
 
     while candidate in unavailable_ports:
         candidate += 1
 
     available_port = candidate
     
-    try:
-        cloudspace.client.api.cloudapi.portforwarding.create(
-            cloudspaceId=machine.space.model['id'],
-            protocol="tcp",
-            localPort=8000,
-            machineId=machine.model['id'],
-            publicIp=machine.space.model['publicipaddress'],
-            publicPort=available_port
-        )
+    node = _get_node(service)
 
-    except Exception as e:
-        raise j.exceptions.RuntimeError("Port forward creation failed for pubic port {} to port 80".format(available_port))
+    #node.model.data.ports.<add>
+    #key = "ports"
+    #all_ports = []
+    #for port_forward in machine.portforwards:
+    #    port_added = "{public}:{local}".format(public=port_forward["publicPort"], local=port_forward["localPort"])
+    #    all_ports.append(port_added)
+    #all_ports.append("{public}:80".format(public=available_port))
+    #setattr(node.model.data, key, all_ports)
+
+    port_forwards = list(node.model.data.ports)
+    port_forwards.append("{public}:80".format(public=available_port))
+    node.model.data.ports = port_forwards
+    node.saveAll()
+
+    #try:
+    #    cloudspace.client.api.cloudapi.portforwarding.create(
+    #        cloudspaceId=machine.space.model['id'],
+    #        protocol="tcp",
+    #        localPort=80,
+    #        machineId=machine.model['id'],
+    #        publicIp=machine.space.model['publicipaddress'],
+    #        publicPort=available_port
+    #    )
+
+    #except Exception as e:
+    #    raise j.exceptions.RuntimeError("Port forward creation failed for pubic port {} to port 80".format(available_port))
 
     return available_port
 
