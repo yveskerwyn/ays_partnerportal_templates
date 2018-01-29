@@ -66,7 +66,7 @@ def _get_node(service):
     return node
 
 def _add_port_forward(service)
-    import ipdb; ipdb.set_trace()
+    #import ipdb; ipdb.set_trace()
     cloudspace = _get_cloud_space(service)
     #machine_name = _get_machine_name(service)
     #machine = cloudspace.machines.get(machine_name)
